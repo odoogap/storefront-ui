@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useCategory } from '@/composables';
 
-const { loadCategoryList } = useCategory();
+const { loadCategoryList, categories } = useCategory();
 
-const { categories } = await loadCategoryList({ filter: { parent: true } });
+await loadCategoryList({ filter: { parent: true } });
 </script>
 
 <template>

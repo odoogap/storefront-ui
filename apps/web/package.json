@@ -4,29 +4,49 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt prepare && nuxt dev",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "codegen": "graphql-codegen",
+    "predev": "yarn codegen"
   },
   "dependencies": {
-    "@erpgap/odoo-sdk": "^0.1.7",
-    "@erpgap/odoo-sdk-api-client": "^0.1.7",
-    "@nuxtjs/tailwindcss": "^6.6.5",
-    "@vue-storefront/sdk": "^1.0.1",
-    "clipboard": "^2.0.11",
-    "vue-toastification": "next",
-    "vue3-json-viewer": "^2.2.2"
-  },
-  "devDependencies": {
-    "@nuxt/devtools": "^0.7.1",
-    "@nuxt/image": "rc",
+    "@apollo/client": "^3.8.6",
+    "@erpgap/odoo-sdk": "^0.4.8",
+    "@erpgap/odoo-sdk-api-client": "^0.4.2",
+    "@nuxt/devtools": "^1.0.0",
+    "@nuxt/image": "^1.0.0",
     "@nuxtjs/fontaine": "^0.4.1",
     "@nuxtjs/i18n": "8.0.0-rc.2",
     "@nuxtjs/tailwindcss": "^6.8.0",
     "@storefront-ui/typography": "^2.0.0",
     "@storefront-ui/vue": "^2.5.0",
-    "nuxt": "^3.6.0"
+    "@vue-storefront/sdk": "^1.1.2",
+    "clipboard": "^2.0.11",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "nuxt": "3.7.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tslib": "^2.6.2",
+    "vue-toastification": "next",
+    "vue3-json-viewer": "^2.2.2"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/client-preset": "^4.0.1",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-generic-sdk": "^3.1.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.1.0"
+  },
+  "overrides": {
+    "react-json-view": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
   },
   "resolutions": {
     "consola": "^3.0.0"

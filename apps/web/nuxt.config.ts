@@ -45,17 +45,17 @@ export default defineNuxtConfig({
       xs: 376,
     },
   },
-
-  vite: {
-    server: {
-      fs: {
-        strict: false,
-        // used to allow importing from outside of the root directory
-      },
-    },
-  },
   build: {
-    transpile: ['vue-toastification'],
+    transpile: [
+      'tslib',
+      '@apollo/client',
+      '@apollo/client/core',
+      '@vue/apollo-composable',
+      '@vue/apollo-option',
+      'ts-invariant',
+      'vue-toastification',
+      '@erpgap/odoo-sdk-api-client'
+    ]
   },
   devtools: {
     enabled: true,

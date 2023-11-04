@@ -1,4 +1,3 @@
-import { sdk } from '@/sdk.config';
 
 export const useCart: any = () => {
   const loading = ref(false);

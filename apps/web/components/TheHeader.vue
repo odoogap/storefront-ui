@@ -18,17 +18,11 @@ import {
 } from '@storefront-ui/vue';
 import { onClickOutside } from '@vueuse/core';
 
-defineProps<{
-  filled?: boolean;
-}>();
+defineProps<{ filled?: boolean }>();
 
-const { loadCategoryList } = useCategory();
+const { loadCategoryList, categories } = useCategory();
 const { isOpen, toggle, close } = useDisclosure();
-const {
-  isOpen: wishlistIsOpen,
-  toggle: wishlistToggle,
-  close: wishlistClose,
-} = useDisclosure();
+const { isOpen: wishlistIsOpen, toggle: wishlistToggle, close: wishlistClose,} = useDisclosure();
 const NuxtLink = resolveComponent('NuxtLink');
 
 const menuRef = ref();
@@ -42,12 +36,8 @@ onClickOutside(menuRef, () => {
   close();
 });
 
-const { categories } = await loadCategoryList({ filter: { parent: true } });
-
-const filteredCategories: any = computed(() =>
-  categories?.filter(
-    (category: any) => category.name === 'WOMEN' || category.name === 'MEN'
-  )
+const filteredCategories = computed(() =>
+  categories?.value?.filter((category: any) => category.name === 'WOMEN' || category.name === 'MEN')
 );
 
 const inputValue = ref('');
@@ -88,6 +78,9 @@ const setWishlistCount = async (count: number) => {
 const handleWishlistSideBar = async () => {
   wishlistToggle();
 };
+
+await loadCategoryList({ filter: { parent: true } });
+
 </script>
 
 <template>

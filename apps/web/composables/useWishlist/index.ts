@@ -1,5 +1,3 @@
-import { sdk } from '@/sdk.config';
-import { } from '@erpgap/odoo-sdk-api-client';
 
 export const useWishlist: any = () => {
   const loading = ref(false);

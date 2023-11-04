@@ -1,60 +1,24 @@
-import { sdk } from '@/sdk.config';
-import {
-  QueryProductsArgs,
-  QueryCategoriesArgs,
-  QueryCategoryArgs,
-} from '@erpgap/odoo-sdk-api-client';
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { QueryProductsArgs, QueryCategoriesArgs, QueryCategoryArgs, CategoryListResponse, Category, CategoryResponse } from '~/graphql';
+import { QueryName } from '~/server/queries';
 
-export const useCategory: any = () => {
+export const useCategory = (categorySlug?: string) => {
+  const { $sdk } = useNuxtApp();
+
   const loading = ref(false);
-  const error = reactive<any>({
-    loadProducts: null,
-    loadCategory: null,
-    loadCategoryList: null,
-  });
-  const loadProducts = async (params: QueryProductsArgs | undefined) => {
-    try {
-      loading.value = true;
-      const { data: productData }: any = await sdk.odoo.getProductTemplateList(
-        params
-      );
-      return {
-        minPrice: productData?.products?.minPrice || 0,
-        maxPrice: productData?.products?.maxPrice || 10000,
-        products: productData.products.products,
-        attributes: productData.products.attributeValues,
-        itemsPerPage: 1,
-        facets: {},
-        perPageOptions: 20,
-        totalProducts: productData.products.totalCount,
-      };
-    } catch (err) {
-      error.loadProducts = err;
-    } finally {
-      loading.value = false;
-    }
-  };
+  const categories = useState<Category[]>('categories', () => ([]));
+  const category = useState<Category>(`category-${categorySlug}`, () => ({} as Category));
 
   const loadCategory = async (params: QueryCategoryArgs) => {
-    try {
-      const categoryResponse: any = await sdk.odoo.getCategory(params);
-      return {
-        category: categoryResponse?.data?.category || {},
-      };
-    } catch (err) {
-      error.loadCategory = err;
-    }
+    const { data } = await $sdk().odoo.query<QueryCategoryArgs, CategoryResponse >({queryName: QueryName.GetCategory}, params);
+
+    category.value = data.value.category;
   };
 
-  const loadCategoryList = async (params: QueryCategoriesArgs | undefined) => {
-    try {
-      const categoryListResponse: any = await sdk.odoo.getCategoryList(params);
-      return {
-        categories: categoryListResponse?.data?.categories?.categories || [],
-      };
-    } catch (err) {
-      error.loadCategoryList = err;
-    }
+  const loadCategoryList = async (params: QueryCategoriesArgs) => {
+    const { data, error } = await $sdk().odoo.query<QueryCategoriesArgs, CategoryListResponse >({queryName: QueryName.GetCategories}, params);
+
+    categories.value = data.value.categories?.categories;
   };
 
   const buildTree = (categories: any) => {
@@ -92,10 +56,10 @@ export const useCategory: any = () => {
 
   return {
     loading,
-    loadProducts,
+    categories,
+    category,
     loadCategoryList,
     loadCategory,
     getCategoryTree,
-    error: computed(() => error),
   };
 };

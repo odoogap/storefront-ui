@@ -1,4 +1,3 @@
-import { sdk } from '@/sdk.config';
 import {
   QueryProductArgs,
   QueryProductVariantArgs,
