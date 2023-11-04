@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useCategory } from '@/composables';
 import {
   SfButton,
   SfDrawer,

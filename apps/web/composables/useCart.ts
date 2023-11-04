@@ -1,5 +1,5 @@
 
-export const useCart: any = () => {
+export const useCart = () => {
   const loading = ref(false);
 
   const loadCart = async () => {

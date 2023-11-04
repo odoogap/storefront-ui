@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useCategory, useProductAttributes, useUiHelpers } from '@/composables';
-import { ProductList, Attribute } from '@erpgap/odoo-sdk-api-client';
 import { SfButton, SfIconTune, useDisclosure } from '@storefront-ui/vue';
 import { useMediaQuery } from '@vueuse/core';
 
@@ -8,40 +6,20 @@ const mediaQueries = {
   tablet: '(min-width: 768px)',
   desktop: '(min-width: 1024px)',
 };
-const route: any = useRoute();
+const route = useRoute();
 const { isOpen, open, close } = useDisclosure();
-const { loadProducts, loadCategory, getCategoryTree } = useCategory();
+const { loadCategory } = useCategory();
+const { loadProductTemplateList, organizedAttributes, loading, productTemplateList} = useProductTemplate(String(route.params.id));
 const { getRegularPrice, getSpecialPrice } = useProductAttributes();
-const { getFacetsFromURL, getGroups } = useUiHelpers();
+const { getFacetsFromURL } = useUiHelpers();
 
 const breadcrumbs = [
   { name: 'Home', link: '/' },
   { name: 'Category', link: `Category/${route.params.id}` },
 ];
-const attributes = await getGroups({
-  pageSize: 12,
-  currentPage: 1,
-  search: '',
-  sort: {},
-  filter: {
-    minPrice: null,
-    maxPrice: null,
-    attribValues: [],
-    categorySlug: '/category/' + route.params.id,
-  },
-});
-const { products: AllProduct, totalProducts } = await loadProducts(
-  getFacetsFromURL(route.query)
-);
-const { category } = await loadCategory({
-  id: Number(route.params.id),
-});
 
-const categories = await getCategoryTree(category);
+await loadCategory({ id: Number(route.params.id)});
 
-const products = useState<any>('products', () => []);
-
-const isLoading = ref(true);
 const productsForPagination = ref([]);
 const mountUrlSlugForProductVariant = (product: {
   slug: any;
@@ -58,19 +36,6 @@ const mountUrlSlugForProductVariant = (product: {
     return joinedSlug.slice(0, -1);
   }
 };
-watch(
-  () => route.fullPath,
-  async () => {
-    isLoading.value = true;
-    const { products: AllProduct, totalProducts } = await loadProducts(
-      getFacetsFromURL(route.query)
-    );
-    products.value = AllProduct;
-    isLoading.value = false;
-    productsForPagination.value = totalProducts;
-  },
-  { deep: true }
-);
 
 const isTabletScreen = useMediaQuery(mediaQueries.tablet);
 const isWideScreen = useMediaQuery(mediaQueries.desktop);
@@ -108,10 +73,10 @@ const totalItems = computed(() =>
 
 onMounted(() => {
   setMaxVisiblePages(isWideScreen.value);
-  products.value = AllProduct;
-  productsForPagination.value = totalProducts;
-  isLoading.value = false;
 });
+
+await loadProductTemplateList(getFacetsFromURL(route.query));
+
 </script>
 <template>
   <div class="pb-20">
@@ -123,22 +88,22 @@ onMounted(() => {
       <div class="col-span-12 lg:col-span-4 xl:col-span-3">
         <CategoryFilterSidebar
           class="hidden lg:block"
-          :attributes="attributes"
+          :attributes="organizedAttributes"
           :categories="categories"
         />
         <LazyCategoryMobileSidebar :is-open="isOpen" @close="close">
           <template #default>
-            <CategoryFilterSidebar
+            <!-- <CategoryFilterSidebar
               class="block lg:hidden"
               @close="close"
-              :attributes="attributes"
+              :attributes="organizedAttributes"
               :categories="categories"
-            />
+            /> -->
           </template>
         </LazyCategoryMobileSidebar>
       </div>
       <div class="col-span-12 lg:col-span-8 xl:col-span-9">
-        <template v-if="!isLoading">
+        <template v-if="!loading">
           <div class="flex justify-between items-center mb-6">
             <span class="font-bold font-headings md:text-lg"
               >{{ totalItems }} Products
@@ -155,11 +120,11 @@ onMounted(() => {
             </SfButton>
           </div>
           <section
-            v-if="products.length > 0"
+            v-if="productTemplateList.length > 0"
             class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 mt-8"
           >
             <LazyUiProductCard
-              v-for="{ id, name, firstVariant, image, isInWishlist } in products"
+              v-for="{ id, name, firstVariant, image, isInWishlist } in productTemplateList"
               :key="id"
               :name="name"
               :slug="mountUrlSlugForProductVariant(firstVariant) || ''"

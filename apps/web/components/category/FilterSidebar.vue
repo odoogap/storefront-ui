@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useUiHelpers } from '@/composables';
 import {
   SfAccordionItem,
   SfButton,
@@ -28,11 +27,10 @@ const props = defineProps({
 const route: any = useRoute();
 const router: any = useRouter();
 const { changeFilters, facetsFromUrlToFilter } = useUiHelpers();
-const categoryTree = computed(() => props.categories);
 const parent = computed(() => {
   return {
-    label: props.categories.label.toLowerCase(),
-    slug: props.categories.slug,
+    label: props.categories?.label?.toLowerCase(),
+    slug: props.categories?.slug,
   };
 });
 const getSortOptions = (searchData: { input: any }) => ({
@@ -79,6 +77,7 @@ const isPriceSelected = (option: any) => {
 const isItemActive = (selectedValue: string) => {
   return selectedFilters.value?.includes(selectedValue);
 };
+
 const facets: any = computed(() => [
   {
     id: null,
@@ -100,8 +99,8 @@ const serializeSize = (data: any[]) => {
     data
       // eslint-disable-next-line func-names
       ?.sort(function (a: any, b: any) {
-        const labelA = a.label;
-        const labelB = b.label;
+        const labelA = a?.label;
+        const labelB = b?.label;
         if (labelA === labelB) {
           const lastCharA = labelA.charAt(labelA.length - 1);
           const lastCharB = labelB.charAt(labelB.length - 1);
@@ -110,7 +109,7 @@ const serializeSize = (data: any[]) => {
           return labelA.localeCompare(labelB);
         }
       })
-      ?.sort((a: { label: number }, b: { label: number }) => a.label - b.label)
+      ?.sort((a: { label: number }, b: { label: number }) => a?.label - b?.label)
   );
 };
 const priceModel = ref<any>('');
@@ -138,9 +137,9 @@ const selectedFilter = (
   );
   if (alreadySelectedIndex === -1) {
     selectedFilters.value.push({
-      filterName: facet.label,
-      label: option.label,
-      id: option.value,
+      filterName: facet?.label,
+      label: option?.label,
+      id: option?.value,
     });
     return;
   }
@@ -203,7 +202,7 @@ onMounted(() => {
               data-testid="list-item-menu-label"
             >
               <SfIconArrowBack size="sm" class="text-neutral-500 mr-2" />
-              {{ parent.label }}
+              {{ parent?.label }}
             </span>
           </span>
         </NuxtLink>
@@ -211,7 +210,7 @@ onMounted(() => {
     </div>
     <ul class="mt-4 mb-6 md:mt-2" data-testid="categories">
       <SfListItem
-        v-for="({ id, label, slug }, index) in categoryTree.items"
+        v-for="({ id, label, slug }, index) in categoryTree?.items"
         :key="label"
         size="lg"
         :class="[
@@ -270,7 +269,7 @@ onMounted(() => {
             <template #summary>
               <div class="flex justify-between items-center p-2 mb-2">
                 <p class="p-2 font-medium typography-headline-5">
-                  {{ facet.label }}
+                  {{ facet?.label }}
                 </p>
                 <SfIconChevronLeft
                   :class="opened[index] ? 'rotate-90' : '-rotate-90'"

@@ -1,5 +1,5 @@
 
-export const useWishlist: any = () => {
+export const useWishlist = () => {
   const loading = ref(false);
 
   const currentWishlist = ref<any>({});

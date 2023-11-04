@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useCategory } from '@/composables';
 
 const { loadCategoryList, categories } = useCategory();
 

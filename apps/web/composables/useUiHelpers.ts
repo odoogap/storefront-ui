@@ -1,7 +1,6 @@
-export const useUiHelpers: any = () => {
+export const useUiHelpers = () => {
   const route: any = useRoute();
   const router = useRouter();
-  const { loadProducts } = useCategory();
 
   const { query, path } = route;
   const productAttributes = reactive<any>({
@@ -17,46 +16,6 @@ export const useUiHelpers: any = () => {
       }
     }
     return path;
-  };
-
-  const getGroups = async (params: any) => {
-    const { attributes } = await loadProducts(params);
-    if (!attributes) return [];
-
-    const data: any = [];
-
-    attributes.forEach((item: any) => {
-      const current = data.find(
-        (itemData: { attributeName: any }) =>
-          itemData.attributeName === item.attribute?.name
-      );
-
-      if (!current) {
-        data.push({
-          id: String(item.attribute.id),
-          label: item.attribute?.name,
-          attributeName: item.attribute?.name,
-          type: item.displayType,
-          count: 0,
-          options: [],
-        });
-      }
-
-      data
-        .find(
-          (itemData: { attributeName: any }) =>
-            itemData.attributeName === item.attribute?.name
-        )
-        .options.push({
-          id: String(item.search),
-          value: item.id,
-          label: item.name,
-          metadata: item.search,
-          htmlColor: item.htmlColor,
-        });
-    });
-    productAttributes.attributes = data;
-    return data;
   };
 
   const getAttributeValues = (filterKey: string, value: string) => {
@@ -198,7 +157,6 @@ export const useUiHelpers: any = () => {
     router.push({ query: allQuery });
   };
   return {
-    getGroups,
     getFacetsFromURL,
     changeFilters,
     facetsFromUrlToFilter,

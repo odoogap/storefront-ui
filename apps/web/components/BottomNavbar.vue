@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useWishlist } from '@/composables';
 import {
   SfButton,
   SfBadge,

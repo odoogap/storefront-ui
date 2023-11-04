@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  useProduct,
-  useProductAttributes,
-  useCart,
-  useWishlist,
-} from '@/composables';
+
 import {
   SfButton,
   SfCounter,

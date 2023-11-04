@@ -1,5 +1,5 @@
 import { H3Error } from 'h3';
-import { Categories, Category } from './gql/graphql';
+import { AttributeValue, Categories, Category, Product, Products } from './gql/graphql';
 import { _AsyncData } from 'nuxt/dist/app/composables/asyncData';
 
 export type CategoryListResponse = _AsyncData<
@@ -15,6 +15,19 @@ export type CategoryListResponse = _AsyncData<
 export type CategoryResponse = _AsyncData<
   {
     category: Category
+  },
+  H3Error
+>;
+
+export type ProductTemplateListResponse = _AsyncData<
+  {
+    products:{
+      attributeValues: AttributeValue[];
+      maxPrice?: number;
+      minPrice?: number;
+      totalCount: number;
+      products: Product[]
+    }
   },
   H3Error
 >;

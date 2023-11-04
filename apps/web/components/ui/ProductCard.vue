@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useCart, useWishlist } from '@/composables';
 import {
   SfRating,
   SfCounter,

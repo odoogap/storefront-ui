@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useWishlist } from '@/composables';
 import { SfDrawer, SfButton, SfIconClose } from '@storefront-ui/vue';
 import { onClickOutside } from '@vueuse/core';
 import { useToast } from 'vue-toastification';
