@@ -7,7 +7,7 @@ export default defineEventHandler((event) => {
   if (event.method === 'POST') {
 
     const config : MiddlewareConfig = {
-      odooGraphqlUrl: `${process.env.ODOO_BASE_URL}graphql/vsf`,
+      odooGraphqlUrl: `${process.env.NUXT_PUBLIC_ODOO_BASE_URL}graphql/vsf`,
       queries: { ...Queries, ...Mutations },
       headers: {
         'REAL-IP': getRequestIP(event) || '',

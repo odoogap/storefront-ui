@@ -210,7 +210,7 @@ onMounted(() => {
     </div>
     <ul class="mt-4 mb-6 md:mt-2" data-testid="categories">
       <SfListItem
-        v-for="({ id, label, slug }, index) in categoryTree?.items"
+        v-for="({ id, label, slug }, index) in categories?.items"
         :key="label"
         size="lg"
         :class="[

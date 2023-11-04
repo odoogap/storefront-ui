@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { SfButton, SfIconTune, useDisclosure } from '@storefront-ui/vue';
-import { useMediaQuery } from '@vueuse/core';
+import { Product } from '~/graphql';
 
-const mediaQueries = {
-  tablet: '(min-width: 768px)',
-  desktop: '(min-width: 1024px)',
-};
 const route = useRoute();
+
 const { isOpen, open, close } = useDisclosure();
 const { loadCategory } = useCategory();
-const { loadProductTemplateList, organizedAttributes, loading, productTemplateList} = useProductTemplate(String(route.params.id));
+const { loadProductTemplateList, organizedAttributes, loading, productTemplateList, totalItems } = useProductTemplate(String(route.params.id));
 const { getRegularPrice, getSpecialPrice } = useProductAttributes();
 const { getFacetsFromURL } = useUiHelpers();
 
@@ -18,30 +15,9 @@ const breadcrumbs = [
   { name: 'Category', link: `Category/${route.params.id}` },
 ];
 
-await loadCategory({ id: Number(route.params.id)});
-
-const productsForPagination = ref([]);
-const mountUrlSlugForProductVariant = (product: {
-  slug: any;
-  variantAttributeValues: any;
-}) => {
-  if (product) {
-    const { slug, variantAttributeValues } = product;
-    const joinedSlug = `${slug}?${variantAttributeValues
-      .map(
-        (variant: { attribute: { name: any }; id: any }) =>
-          `${variant?.attribute?.name}=${variant?.id}&`
-      )
-      .join('')}`;
-    return joinedSlug.slice(0, -1);
-  }
-};
-
-const isTabletScreen = useMediaQuery(mediaQueries.tablet);
-const isWideScreen = useMediaQuery(mediaQueries.desktop);
 const maxVisiblePages = ref(1);
-const setMaxVisiblePages = (isWide: boolean) =>
-  (maxVisiblePages.value = isWide ? 5 : 1);
+const setMaxVisiblePages = (isWide: boolean) => (maxVisiblePages.value = isWide ? 5 : 1);
+
 watch(isWideScreen, (value) => setMaxVisiblePages(value));
 watch(isTabletScreen, (value) => {
   if (value && isOpen.value) {
@@ -49,32 +25,19 @@ watch(isTabletScreen, (value) => {
   }
 });
 
-const getPagination = (totalProducts: any) => {
-  const itemsPerPage = totalProducts.value.input?.pageSize || 12;
-  return {
-    currentPage: 1,
-    totalPages: Math.ceil(totalProducts.value / itemsPerPage) || 1,
-    totalItems: totalProducts.value,
-    itemsPerPage,
-    pageOptions: [5, 12, 15, 20],
-  };
-};
-const pagination = computed(() => getPagination(productsForPagination));
-watch(
-  () => route.fullPath,
-  () => {
-    getPagination(productsForPagination);
-  },
-  { deep: true }
-);
-const totalItems = computed(() =>
-  pagination.value.totalItems === 0 ? 'No' : pagination.value.totalItems
-);
+const pagination = computed(() => ({
+  currentPage: 1,
+  totalPages: Math.ceil(totalItems.value / 12) || 1,
+  totalItems: totalItems.value,
+  itemsPerPage: 12,
+  pageOptions: [5, 12, 15, 20],
+}));
 
 onMounted(() => {
   setMaxVisiblePages(isWideScreen.value);
 });
 
+await loadCategory({ id: Number(route.params.id)});
 await loadProductTemplateList(getFacetsFromURL(route.query));
 
 </script>
@@ -124,11 +87,11 @@ await loadProductTemplateList(getFacetsFromURL(route.query));
             class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 mt-8"
           >
             <LazyUiProductCard
-              v-for="{ id, name, firstVariant, image, isInWishlist } in productTemplateList"
-              :key="id"
-              :name="name"
-              :slug="mountUrlSlugForProductVariant(firstVariant) || ''"
-              :image-url="`https://vsfdemo15.labs.odoogap.com${image}`"
+              v-for="productTemplate in productTemplateList"
+              :key="productTemplate.id"
+              :name="productTemplate.name"
+              :slug="mountUrlSlugForProductVariant(productTemplate.firstVariant as Product)"
+              :image-url="$getImage(String(productTemplate.image), 370, 370, String(productTemplate.imageFilename))"
               :image-alt="name"
               :regular-price="getRegularPrice(firstVariant) || 250"
               :special-price="getSpecialPrice(firstVariant)"

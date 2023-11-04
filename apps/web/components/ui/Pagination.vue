@@ -1,3 +1,47 @@
+<script setup lang="ts">
+import {
+  SfButton,
+  SfIconChevronLeft,
+  SfIconChevronRight,
+  usePagination,
+} from '@storefront-ui/vue';
+
+const props = defineProps({
+  currentPage: Number,
+  pageSize: Number,
+  totalItems: Number,
+  maxVisiblePages: Number,
+});
+const route = useRoute();
+const router = useRouter();
+
+const {
+  currentPage,
+  pageSize,
+  totalItems,
+  maxVisiblePages: maxVisiblePagesProperty,
+}: any = toRefs(props);
+
+const pagination = computed<any>(() =>
+  reactive(
+    usePagination({
+      totalItems: totalItems.value,
+      currentPage: currentPage.value,
+      pageSize: pageSize.value,
+      maxPages: maxVisiblePagesProperty.value,
+    })
+  )
+);
+
+const setParams = (filter: any) => {
+  router.push({ query: { ...route.query, ...filter } });
+};
+
+onMounted(() => {
+  pagination.value?.setPage(route.query.page ? Number(route.query.page) : 1);
+});
+</script>
+
 <template>
   <nav
     class="flex justify-between items-end border-t border-neutral-200"
@@ -178,46 +222,3 @@
   </nav>
 </template>
 
-<script setup lang="ts">
-import {
-  SfButton,
-  SfIconChevronLeft,
-  SfIconChevronRight,
-  usePagination,
-} from '@storefront-ui/vue';
-import { LocationQueryRaw } from 'vue-router';
-
-const props = defineProps({
-  currentPage: Number,
-  pageSize: Number,
-  totalItems: Number,
-  maxVisiblePages: Number,
-});
-const route = useRoute();
-const router = useRouter();
-
-const {
-  currentPage,
-  pageSize,
-  totalItems,
-  maxVisiblePages: maxVisiblePagesProperty,
-}: any = toRefs(props);
-const pagination = computed<any>(() =>
-  reactive(
-    usePagination({
-      totalItems: totalItems.value,
-      currentPage: currentPage.value,
-      pageSize: pageSize.value,
-      maxPages: maxVisiblePagesProperty.value,
-    })
-  )
-);
-
-const setParams = (filter: any) => {
-  router.push({ query: { ...route.query, ...filter } });
-};
-
-onMounted(() => {
-  pagination.value?.setPage(route.query.page ? Number(route.query.page) : 1);
-});
-</script>

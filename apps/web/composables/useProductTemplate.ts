@@ -6,6 +6,7 @@ export const useProductTemplate = (categoryId: string) => {
   const { $sdk } = useNuxtApp();
 
   const loading = ref(false);
+  const totalItems = ref(0);
   const productTemplateList = useState<Product[]>(`products-category${categoryId}`, () => ([]));
   const attributes = useState<AttributeValue[]>(`attributes${categoryId}`, () => ([]));
 
@@ -16,6 +17,7 @@ export const useProductTemplate = (categoryId: string) => {
 
     productTemplateList.value = data.value.products?.products || [];
     attributes.value = data.value.products?.attributeValues || [];
+    totalItems.value = data.value.products.totalCount;
   };
 
   const organizedAttributes = computed(() => {
@@ -61,6 +63,7 @@ export const useProductTemplate = (categoryId: string) => {
     loading,
     loadProductTemplateList,
     productTemplateList,
-    organizedAttributes
+    organizedAttributes,
+    totalItems
   };
 };
