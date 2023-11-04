@@ -6,7 +6,7 @@ const route = useRoute();
 
 const { isOpen, open, close } = useDisclosure();
 const { loadCategory } = useCategory();
-const { loadProductTemplateList, organizedAttributes, loading, productTemplateList, totalItems } = useProductTemplate(String(route.params.id));
+const { loadProductTemplateList, organizedAttributes, loading, productTemplateList, totalItems, categories } = useProductTemplate(String(route.params.id));
 const { getRegularPrice, getSpecialPrice } = useProductAttributes();
 const { getFacetsFromURL } = useUiHelpers();
 
@@ -24,6 +24,10 @@ watch(isTabletScreen, (value) => {
     close();
   }
 });
+
+watch(() => route.fullPath, async(value) => {
+  await loadProductTemplateList(getFacetsFromURL(route.query));
+}, {deep: true });
 
 const pagination = computed(() => ({
   currentPage: 1,
@@ -56,12 +60,12 @@ await loadProductTemplateList(getFacetsFromURL(route.query));
         />
         <LazyCategoryMobileSidebar :is-open="isOpen" @close="close">
           <template #default>
-            <!-- <CategoryFilterSidebar
+            <CategoryFilterSidebar
               class="block lg:hidden"
               @close="close"
               :attributes="organizedAttributes"
               :categories="categories"
-            /> -->
+            />
           </template>
         </LazyCategoryMobileSidebar>
       </div>
@@ -89,16 +93,16 @@ await loadProductTemplateList(getFacetsFromURL(route.query));
             <LazyUiProductCard
               v-for="productTemplate in productTemplateList"
               :key="productTemplate.id"
-              :name="productTemplate.name"
+              :name="productTemplate?.name || ''"
               :slug="mountUrlSlugForProductVariant(productTemplate.firstVariant as Product)"
               :image-url="$getImage(String(productTemplate.image), 370, 370, String(productTemplate.imageFilename))"
-              :image-alt="name"
-              :regular-price="getRegularPrice(firstVariant) || 250"
-              :special-price="getSpecialPrice(firstVariant)"
-              :is-in-wishlist = "isInWishlist"
+              :image-alt="productTemplate?.name || ''"
+              :regular-price="getRegularPrice((productTemplate.firstVariant as Product)) || 250"
+              :special-price="getSpecialPrice((productTemplate.firstVariant as Product))"
+              :is-in-wishlist ="productTemplate?.isInWishlist || false"
               :rating-count="123"
               :rating="Number(4)"
-              :first-variant="firstVariant"
+              :first-variant="(productTemplate.firstVariant as Product)"
             />
           </section>
           <CategoryEmptyState v-else />

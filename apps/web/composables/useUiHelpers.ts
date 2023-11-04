@@ -1,11 +1,10 @@
+import { ProductFilterInput, QueryProductsArgs } from '~/graphql';
+
 export const useUiHelpers = () => {
   const route: any = useRoute();
   const router = useRouter();
 
   const { query, path } = route;
-  const productAttributes = reactive<any>({
-    attributes: [],
-  });
 
   const queryParamsNotFilters = ['page', 'sort', 'itemsPerPage'];
   const localePrefixes = ['/en', '/de', '/ru'];
@@ -18,45 +17,19 @@ export const useUiHelpers = () => {
     return path;
   };
 
-  const getAttributeValues = (filterKey: string, value: string) => {
-    let attribute: any = {};
-
-    attribute = productAttributes.attributes?.find(
-      (item: { label: string }) => {
-        return item.label === filterKey;
-      }
-    );
-
-    let option = {};
-    if (attribute) {
-      option = attribute?.options.find((item: { value: any }) => {
-        return Number(item.value) === Number(value.split('-')[0]);
-      });
-    }
-    return option;
-  };
-
-  const getFacetsFromURL = (QueryFromUrl: any) => {
+  const getFacetsFromURL = (query: any) : QueryProductsArgs => {
     const filters: string[] = [];
-    const query = QueryFromUrl;
+
     if (query) {
       Object.keys(query).forEach((filterKey) => {
         if (![...queryParamsNotFilters, 'price'].includes(filterKey)) {
           if (query[filterKey].includes(',')) {
             query[filterKey]?.split(',').forEach((label: string) => {
-              const getProperAttribute: any = getAttributeValues(
-                filterKey,
-                label?.split('-')[0]
-              );
-              filters.push(getProperAttribute?.id);
+              filters.push(filterKey);
             });
           } else {
             const label = query[filterKey]?.split(',')[0];
-            const getProperAttribute: any = getAttributeValues(
-              filterKey,
-              label
-            );
-            filters.push(getProperAttribute?.id);
+            filters.push(label);
           }
         }
       });
@@ -74,13 +47,6 @@ export const useUiHelpers = () => {
       attribValues: filters,
       categorySlug: path === '/' ? null : pathToSlug(),
     };
-    const filtersForHash = {
-      ...productFilters,
-      pageSize,
-      price,
-      page,
-      sort,
-    };
 
     return {
       pageSize,
@@ -88,7 +54,7 @@ export const useUiHelpers = () => {
       // cacheKey: `API-P${hash(filtersForHash, { algorithm: 'md5' })}`,
       search: '',
       sort: { [sort[0]]: sort[1] },
-      filter: productFilters,
+      filter: productFilters as ProductFilterInput,
     };
   };
   const facetsFromUrlToFilter = () => {

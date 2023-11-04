@@ -82,10 +82,9 @@ const addToWishlist = async (firstVariant: any) => {
         <NuxtImg
           :src="imageUrl"
           :alt="imageAlt"
+          :width="370"
+          :height="370"
           class="rounded-md"
-          fit="fill"
-          width="full"
-          height="full"
         />
       </SfLink>
       <SfButton

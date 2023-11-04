@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { AttributeValue, Product, ProductTemplateListResponse, QueryProductsArgs } from '~/graphql';
+import { AttributeValue, Category, Product, ProductTemplateListResponse, QueryProductsArgs } from '~/graphql';
 import { QueryName } from '~/server/queries';
-
+import { uniqBy } from 'lodash';
 export const useProductTemplate = (categoryId: string) => {
   const { $sdk } = useNuxtApp();
 
@@ -9,15 +9,17 @@ export const useProductTemplate = (categoryId: string) => {
   const totalItems = ref(0);
   const productTemplateList = useState<Product[]>(`products-category${categoryId}`, () => ([]));
   const attributes = useState<AttributeValue[]>(`attributes${categoryId}`, () => ([]));
+  const categories = useState<Category[]>(`categories-from-product-${categoryId}`, () => ([]));
 
   const loadProductTemplateList = async (params: QueryProductsArgs) => {
     loading.value = true;
     const { data } = await $sdk().odoo.query<QueryProductsArgs, ProductTemplateListResponse>({queryName: QueryName.GetProductTemplateList }, params);
     loading.value = false;
 
-    productTemplateList.value = data.value.products?.products || [];
+    productTemplateList.value = data.value?.products?.products || [];
     attributes.value = data.value.products?.attributeValues || [];
-    totalItems.value = data.value.products.totalCount;
+    totalItems.value = data.value?.products?.totalCount || 0;
+    categories.value = uniqBy(data.value.products?.products?.map(product => product?.categories || []).flat(), 'id');
   };
 
   const organizedAttributes = computed(() => {
@@ -64,6 +66,7 @@ export const useProductTemplate = (categoryId: string) => {
     loadProductTemplateList,
     productTemplateList,
     organizedAttributes,
-    totalItems
+    totalItems,
+    categories
   };
 };

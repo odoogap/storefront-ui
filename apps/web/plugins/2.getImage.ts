@@ -11,15 +11,3 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   };
 });
-
-declare module '#app' {
-  interface NuxtApp {
-    $getImage(imagePath: string, width: number, heigth: number, name: string): string
-  }
-}
-
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $getImage(imagePath: string, width: number, heigth: number, name: string): string
-  }
-}

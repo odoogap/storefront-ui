@@ -27,6 +27,7 @@ const props = defineProps({
 const route: any = useRoute();
 const router: any = useRouter();
 const { changeFilters, facetsFromUrlToFilter } = useUiHelpers();
+
 const parent = computed(() => {
   return {
     label: props.categories?.label?.toLowerCase(),
@@ -34,27 +35,7 @@ const parent = computed(() => {
   };
 });
 const getSortOptions = (searchData: { input: any }) => ({
-  options: [
-    {
-      id: 'list_price desc',
-      value: 'price,DESC',
-      attrName: 'Price: High to Low',
-      type: '',
-    },
-    {
-      id: 'list_price asc',
-      value: 'price,ASC',
-      attrName: 'Price: Low to High',
-      type: '',
-    },
-    { id: 'name asc', value: 'name,ASC', attrName: 'Name: A to Z', type: '' },
-    {
-      id: 'name desc',
-      value: 'name,DESC',
-      attrName: 'Name: Z to A',
-      type: '',
-    },
-  ],
+  options: sortOptions,
   selected: searchData.input.sort || 'name asc',
 });
 const changeSorting = async (sort: string) => {
@@ -94,24 +75,7 @@ const facets: any = computed(() => [
   ...props.attributes,
 ]);
 const opened = ref<boolean[]>(facets.value.map(() => true));
-const serializeSize = (data: any[]) => {
-  return (
-    data
-      // eslint-disable-next-line func-names
-      ?.sort(function (a: any, b: any) {
-        const labelA = a?.label;
-        const labelB = b?.label;
-        if (labelA === labelB) {
-          const lastCharA = labelA.charAt(labelA.length - 1);
-          const lastCharB = labelB.charAt(labelB.length - 1);
-          return lastCharA.localeCompare(lastCharB);
-        } else {
-          return labelA.localeCompare(labelB);
-        }
-      })
-      ?.sort((a: { label: number }, b: { label: number }) => a?.label - b?.label)
-  );
-};
+
 const priceModel = ref<any>('');
 const selectPrice = (values: any) => {
   const newValue: any = [values];
@@ -210,29 +174,27 @@ onMounted(() => {
     </div>
     <ul class="mt-4 mb-6 md:mt-2" data-testid="categories">
       <SfListItem
-        v-for="({ id, label, slug }, index) in categories?.items"
-        :key="label"
+        v-for="(category, index) in categories"
+        :key="category.name"
         size="lg"
         :class="[
           'md:sf-list-item-sm md:py-1.5 sf-list-item',
           {
             'bg-primary-100 hover:bg-primary-100 active:bg-primary-100 font-medium':
-              id === route.query.id,
+            category.id === route.query.id,
           },
         ]"
         data-testid="category-tree-item"
       >
-        <NuxtLink :to="slug">
           <span class="flex gap-2 items-center">
             <span
               class="text-base md:text-sm capitalize flex items-center"
               data-testid="list-item-menu-label"
             >
               <slot />
-              {{ label }}
+              {{ category.name }}
             </span>
           </span>
-        </NuxtLink>
       </SfListItem>
     </ul>
     <h5
@@ -312,7 +274,7 @@ onMounted(() => {
               class="grid grid-cols-5 gap-2 px-3"
             >
               <li
-                v-for="{ id, value, label } in serializeSize(facet.options)"
+                v-for="{ id, value, label } in (facet.options)"
                 :key="id"
               >
                 <SfChip
