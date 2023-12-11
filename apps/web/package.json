@@ -23,6 +23,7 @@
     "@nuxtjs/tailwindcss": "^6.8.0",
     "@storefront-ui/typography": "^2.0.0",
     "@storefront-ui/vue": "^2.5.0",
+    "@storyblok/design-system": "^3.17.0",
     "@vue-storefront/sdk": "^1.1.2",
     "clipboard": "^2.0.11",
     "graphql": "^16.8.1",

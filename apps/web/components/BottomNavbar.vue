@@ -35,12 +35,12 @@ const handleWishlistSideBar = async () => {
 </script>
 
 <template>
-  <WishlistSidebar
+  <!-- <WishlistSidebar
     :collected-products="collectedProducts"
     :is-open="wishlistIsOpen"
     @wishlistCount="setWishlistCount"
     @close="wishlistClose"
-  />
+  /> -->
   <nav
     class="w-full fixed bottom-0 left-0 flex flex-row items-stretch lg:hidden"
     data-testid="navbar-bottom"
