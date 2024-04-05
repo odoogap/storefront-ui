@@ -4,7 +4,7 @@
       <legend class="text-neutral-900 text-lg font-bold mb-4">
         {{ $t("checkoutPayment.heading") }}
       </legend>
-      <div class="grid gap-4 grid-cols-2">
+      <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
         <label
           v-for="method in paymentMethods"
           :key="method.id"
@@ -28,16 +28,29 @@
               }}</span>
             </span> -->
             <div class="flex space-x-2">
-              <NuxtImg
-                v-for="img in method.paymentIcons"
-                :key="`${img.id}`"
-                :src="`https://vsfdemo15.labs.odoogap.com${img.image}`"
-                :alt="img.name"
-                width="30"
-                height="20"
-              />
+              <template
+                v-for="pm in method.paymentMethods.filter(
+                  (item: any) => item.code === 'card',
+                )"
+                :key="`${pm.id}`"
+              >
+                <NuxtImg
+                  v-for="brand in pm.brands"
+                  :key="`${brand.id}`"
+                  :src="`${brand.image}`"
+                  :alt="brand.name"
+                  width="30"
+                  height="15"
+                  provider="odooProvider"
+                />
+              </template>
             </div>
-            <span class="font-medium mt-2">{{ method.displayAs }}</span>
+            <!-- <span class="font-medium mt-2">{{ method.name }}</span> -->
+            <NuxtImg
+              provider="odooProvider"
+              :src="`${method.image}`"
+              :alt="method.name"
+            />
             <!-- <span v-if="disabled" class="text-xs text-neutral-500">{{
               $t('checkoutPayment.comingSoon')
             }}</span> -->
@@ -49,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { SfIconCreditCard } from "@storefront-ui/vue";
 import { PaymentAcquirer } from "~/graphql";
 
 type CheckoutPaymentProps = {
@@ -58,9 +72,11 @@ type CheckoutPaymentProps = {
 
 type CheckoutPaymentEmits = (
   event: "update:activePayment",
-  parameter: number
+  parameter: number,
 ) => void;
 
-defineProps<CheckoutPaymentProps>();
+const props = defineProps<CheckoutPaymentProps>();
 defineEmits<CheckoutPaymentEmits>();
+
+const { t } = useI18n();
 </script>

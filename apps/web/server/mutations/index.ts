@@ -4,6 +4,8 @@ import AdyenPaymentDetails from "./AdyenPaymentDetails";
 import AdyenPaymentMethods from "./AdyenPaymentMethods";
 import AdyenPayments from "./AdyenPayments";
 import AdyenTransaction from "./AdyenTransaction";
+import StripeTransaction from "./StripeTransaction";
+import StripeInlineform from "./StripeInlineform";
 import CartAddItem from "./CartAddItem";
 import CartRemoveItem from "./CartRemoveItem";
 import CartUpdateQuantity from "./CartUpdateQuantity";
@@ -43,6 +45,8 @@ enum MutationName {
   AdyenPaymentMethods = "AdyenPaymentMethods",
   AdyenPaymentDetails = "AdyenPaymentDetails",
   AdyenPayments = "AdyenPayments",
+  StripeTransaction = "StripeTransaction",
+  StripeInlineform = "StripeInlineform"
 }
 
 const Mutations: Record<MutationName, DocumentNode> = {
@@ -67,6 +71,8 @@ const Mutations: Record<MutationName, DocumentNode> = {
   AdyenPaymentMethods,
   AdyenPaymentDetails,
   AdyenPayments,
+  StripeTransaction,
+  StripeInlineform
 };
 
 export { Mutations, MutationName };

@@ -14,55 +14,38 @@ import {
   SfIconMenu,
   SfInput,
   SfIconSearch,
+  SfLink,
 } from "@storefront-ui/vue";
 import { onClickOutside } from "@vueuse/core";
-import { useRouter, useRoute } from "#vue-router";
-import { AlgoliaHitType } from "@/types/algolia";
+import { flatten, path, omit } from "rambda/immutable";
 
 defineProps<{ filled?: boolean }>();
 
 const { loadCategoryList, categories } = useCategory();
 const { isOpen, toggle, close } = useDisclosure();
 const { wishlistSidebarIsOpen, toggleWishlistSideBar } = useUiState();
-const { wishlistTotalItems, loadWishlist } = useWishlist();
-
-const { result, search: algoliaSearch } = useAlgoliaSearch("header");
-
+const { wishlistTotalItems, loadWishlist, wishlist } = useWishlist();
 const NuxtLink = resolveComponent("NuxtLink");
-
 const router = useRouter();
-const route = useRoute();
 
 const menuRef = ref();
 const drawerRef = ref();
-const searchRef = ref();
-const showSearchClerkRef = ref();
-const highlightedIndex = ref(-1);
-
-onMounted(async () => {
-  await loadWishlist();
-});
-
 useTrapFocus(drawerRef, {
   activeState: isOpen,
   arrowKeysUpDown: true,
   initialFocus: "container",
 });
-
 onClickOutside(menuRef, () => {
   close();
 });
 
-onClickOutside(searchRef, () => {
-  showSearchClerkRef.value = false;
-});
+const cartCounter = useCookie<number>("cart-counter");
 
-const filteredCategories = computed(() =>
-  categories?.value?.filter(
-    (category: any) => category.name === "WOMEN" || category.name === "MEN"
-  )
-);
-
+const inputValue = ref("");
+const search = () => {
+  // eslint-disable-next-line no-alert
+  alert(`Successfully found 10 results for ${inputValue.value}`);
+};
 const actionItems = [
   {
     icon: SfIconShoppingCart,
@@ -93,56 +76,59 @@ const handleWishlistSideBar = async () => {
 
 await loadCategoryList({ filter: { parent: true } });
 
-const searchHits = computed<AlgoliaHitType[]>(() => result.value?.hits || []);
+onMounted(async () => {
+  await loadWishlist();
+  window.addEventListener("mousemove", mouseDirection);
+});
 
-const selectHit = (hit: AlgoliaHitType) => {
-  router.push(`/search?search=${hit?.name || inputValue.value}`);
-  showSearchClerkRef.value = false;
-  inputValue.value = hit.name;
+const activeMainCategory = ref(0);
+const throttle = ref(false);
+const direction = ref("");
+const lastX = ref(0);
+const lastY = ref(0);
+
+const isActive = (key) => {
+  return activeMainCategory.value === key;
 };
-
-const cartCounter = useCookie<number>("cart-counter");
-
-const inputValue = ref(route.query?.search || "");
-
-const search = async (event: Event) => {
-  const query = (event.target as HTMLInputElement).value;
-  if (!query) {
-    showSearchClerkRef.value = false;
-    return;
+const mouseDirection = (e) => {
+  if (!throttle.value) {
+    throttle.value = true;
+    const theta = Math.abs(
+      (180 * Math.atan2(e.pageY - lastY.value, e.pageX - lastX.value)) /
+        Math.PI,
+    );
+    direction.value = theta > 75 ? "vertical" : "horizontal";
+    lastX.value = e.pageX;
+    lastY.value = e.pageY;
+    setTimeout(() => {
+      throttle.value = false;
+    }, 50);
   }
-  await algoliaSearch({
-    query: (event.target as HTMLInputElement).value,
+};
+const changeMainCategory = (index) => {
+  if (direction.value === "vertical") {
+    activeMainCategory.value = index;
+  }
+};
+onBeforeUnmount(() => {
+  window.removeEventListener("mousemove", mouseDirection);
+});
+const filteredCategories = (() => {
+  const temp = categories.value.map((i) => {
+    if (Array.isArray(i.childs)) {
+      i.childs = i.childs.reduce((accumulator, currentVal) => {
+        accumulator.push(omit("childs", currentVal));
+        if (Array.isArray(currentVal?.childs)) {
+          return accumulator.concat(flatten([...currentVal.childs]));
+        }
+        return accumulator;
+      }, []);
+    }
+    return i;
   });
-  showSearchClerkRef.value = true;
-  highlightedIndex.value = -1;
-};
 
-const openSearchClerk = computed(
-  () => searchHits.value?.length > 0 && showSearchClerkRef.value
-);
-
-const setInputValue = (value: string) => {
-  inputValue.value = value;
-};
-
-const highlightPrevious = () => {
-  if (highlightedIndex.value === 0) {
-    highlightedIndex.value = searchHits.value.length - 1;
-  } else {
-    highlightedIndex.value -= 1;
-  }
-  setInputValue(searchHits.value[highlightedIndex.value]?.name);
-};
-
-const highlightNext = () => {
-  if (highlightedIndex.value === searchHits.value.length - 1) {
-    highlightedIndex.value = 0;
-  } else {
-    highlightedIndex.value += 1;
-  }
-  setInputValue(searchHits.value[highlightedIndex.value]?.name);
-};
+  return temp;
+})();
 </script>
 
 <template>
@@ -201,7 +187,92 @@ const highlightNext = () => {
                   class="bg-white p-0 max-h-screen overflow-y-auto lg:!absolute lg:!top-[5rem] max-w-full lg:p-6 top-index"
                 >
                   <div
-                    class="grid grid-cols-1 lg:gap-x-6 lg:grid-cols-3 lg:narrow-container lg:relative"
+                    class="hidden md:grid grid-cols-1 lg:gap-x-6 lg:grid-cols-4 lg:relative h-[60vh]"
+                  >
+                    <div
+                      class="sticky top-0 flex items-center justify-between py-2 px-4 bg-primary-700 lg:hidden w-full"
+                    >
+                      <div
+                        class="flex items-center typography-text-lg font-medium text-white"
+                      >
+                        Browse products
+                      </div>
+                      <SfButton
+                        square
+                        variant="tertiary"
+                        aria-label="Close navigation menu"
+                        class="text-white ml-2"
+                        @click="close()"
+                        @keydown.enter.space="close()"
+                      >
+                        <SfIconClose />
+                      </SfButton>
+                    </div>
+                    <div class="main-categories">
+                      <SfListItem
+                        v-for="(category, index) in filteredCategories"
+                        :key="'cat' + category.id"
+                        tag="a"
+                        size="sm"
+                        role="none"
+                        :class="[
+                          'typography-text-base lg:typography-text-sm py-4 lg:py-1.5 text-black rounded-xl',
+                          isActive(index) ? 'active' : '',
+                        ]"
+                        @mouseover="changeMainCategory(index)"
+                      >
+                        {{ category.name }}
+                      </SfListItem>
+                    </div>
+                    <div class="sub-categories col-span-3">
+                      <div
+                        v-for="(child, childIndex) in filteredCategories[
+                          activeMainCategory
+                        ].childs"
+                        :key="
+                          'sub' +
+                          filteredCategories[activeMainCategory].id +
+                          child.id +
+                          childIndex
+                        "
+                        class="sub-category rounded-xl"
+                      >
+                        <SfLink
+                          :href="child.slug"
+                          variant="primary"
+                          class="text-black rounded-xl no-underline"
+                        >
+                          <NuxtImg
+                            class="w-full h-auto rounded-md image-category"
+                            :src="`/web/image/product.public.category/${child.id}/image_1920`"
+                            :alt="child.name ?? ''"
+                            width="150"
+                            height="150"
+                            loading="lazy"
+                            provider="odooProvider"
+                          />
+                          <div class="label text-center">
+                            {{ child.name }}
+                          </div>
+                        </SfLink>
+                      </div>
+                    </div>
+
+                    <SfButton
+                      square
+                      size="sm"
+                      variant="tertiary"
+                      aria-label="Close navigation menu"
+                      class="hidden lg:block lg:absolute lg:right-0 lg:top-0 hover:bg-primary-50 active:bg-white"
+                      @click="close()"
+                    >
+                      <SfIconClose class="text-neutral-500" />
+                    </SfButton>
+                  </div>
+                  <!-- Mobile -->
+
+                  <div
+                    class="md:hidden sm:grid grid-cols-1 lg:gap-x-6 lg:grid-cols-3 lg:narrow-container lg:relative"
                   >
                     <div
                       class="sticky top-0 flex items-center justify-between py-2 px-4 bg-primary-700 lg:hidden w-full"
@@ -266,16 +337,6 @@ const highlightNext = () => {
                         {{ bannerDetails.title }}
                       </p>
                     </div>
-                    <SfButton
-                      square
-                      size="sm"
-                      variant="tertiary"
-                      aria-label="Close navigation menu"
-                      class="hidden lg:block lg:absolute lg:right-0 lg:top-0 hover:bg-white active:bg-white"
-                      @click="close()"
-                    >
-                      <SfIconClose class="text-neutral-500" />
-                    </SfButton>
                   </div>
                 </SfDrawer>
               </transition>
@@ -284,10 +345,9 @@ const highlightNext = () => {
         </nav>
         <form
           v-if="filled"
-          ref="searchRef"
           role="search"
-          class="hidden lg:flex flex-[100%] mt-2 md:mt-0 md:ml-10 pb-2 md:pb-0 relative w-full"
-          @submit.prevent
+          class="hidden lg:flex flex-[100%] mt-2 md:mt-0 md:ml-10 pb-2 md:pb-0"
+          @submit.prevent="search"
         >
           <SfInput
             v-model="inputValue"
@@ -296,10 +356,6 @@ const highlightNext = () => {
             placeholder="Search"
             wrapper-class="flex-1 h-10 pr-0"
             size="base"
-            @input="search"
-            @keydown.up.prevent="highlightPrevious"
-            @keydown.down.prevent="highlightNext"
-            @keydown.enter.prevent="selectHit(searchHits[highlightedIndex])"
           >
             <template #suffix>
               <span class="flex items-center">
@@ -315,22 +371,6 @@ const highlightNext = () => {
               </span>
             </template>
           </SfInput>
-
-          <transition
-            enter-active-class="transform transition duration-500 ease-in-out"
-            leave-active-class="transform transition duration-500 ease-in-out"
-            enter-from-class="-translate-x-full md:translate-x-0 md:opacity-0"
-            enter-to-class="translate-x-0 md:translate-x-0 md:opacity-100"
-            leave-from-class="translate-x-0 md:opacity-100"
-            leave-to-class="-translate-x-full md:translate-x-0 md:opacity-0"
-          >
-            <SearchClerk
-              v-if="openSearchClerk"
-              :hits="searchHits"
-              :highlighted-index="highlightedIndex"
-              @select="selectHit"
-            />
-          </transition>
         </form>
         <nav
           v-if="filled"
@@ -413,3 +453,70 @@ const highlightNext = () => {
     </header>
   </div>
 </template>
+<style scoped>
+.main-categories {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  gap: 0px 0px;
+}
+
+.main-category {
+  display: flex;
+  cursor: pointer;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.main-category:not(:last-of-type) {
+  /* border-bottom: 1px solid #e80000; */
+}
+
+.main-category .icon {
+  margin-right: 15px;
+}
+
+.main-category.active {
+  background: #c9c9c9;
+  border-radius: 20px;
+}
+
+.sub-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    ". . . ."
+    ". . . ."
+    ". . . .";
+  overflow-y: auto;
+  height: 100%;
+  grid-auto-rows: 10rem;
+}
+
+.sub-category {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.sub-category:hover {
+}
+
+.image-category:hover {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.sub-category .label {
+  margin-top: 15px;
+  color: #000000;
+}
+.sub-category .label:hover {
+  color: #8a8a8a;
+}
+</style>

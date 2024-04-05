@@ -20,8 +20,8 @@ html {
   }
   .grid-areas-product-page {
     grid-template-areas:
-      'left-top right'
-      'left-bottom right';
+      "left-top right"
+      "left-bottom right";
   }
   .grid-cols-product-page {
     grid-template-columns: minmax(56%, 500px) auto;
@@ -35,4 +35,23 @@ html {
   .top-index {
     z-index: 10 !important;
   }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

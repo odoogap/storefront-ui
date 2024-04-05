@@ -9,6 +9,19 @@ order {
   dateOrder
   orderUrl
   stage
+  currency {
+    id
+    name
+    symbol
+  }
+  lastTransaction {
+    state
+    payment {
+      id
+      name
+    }
+    amount
+  }
   websiteOrderLine {
     id
     name

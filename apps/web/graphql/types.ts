@@ -14,6 +14,8 @@ import {
   AdyenPaymentMethodsResult,
   AdyenPaymentDetailsResult,
   AdyenPaymentsResult,
+  StripeTransactionResult,
+  StripeInformResult,
 } from "./gql/graphql";
 import { H3Error } from "h3";
 import { _AsyncData } from "nuxt/dist/app/composables/asyncData";
@@ -215,6 +217,20 @@ export type PaymentMethodListResponse = _AsyncData<
 export type AdyenTransactionResponse = _AsyncData<
   {
     adyenTransaction: AdyenTransactionResult;
+  },
+  H3Error
+>;
+
+export type StripeTransactionResponse = _AsyncData<
+  {
+    transaction: StripeTransactionResult;
+  },
+  H3Error
+>;
+
+export type StripeInlineFormResponse = _AsyncData<
+  {
+    inlineFormValues: StripeInformResult;
   },
   H3Error
 >;

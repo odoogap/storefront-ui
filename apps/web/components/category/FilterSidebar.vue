@@ -46,12 +46,12 @@ const sortBy = computed(() => getSortOptions({ input: { sort: sort.value } }));
 const selectedFilters = ref<any>([]);
 const isFilterSelected = (option: any) => {
   return selectedFilters.value.some(
-    (filter: { id: any }) => String(filter.id) === String(option.value)
+    (filter: { id: any }) => String(filter.id) === String(option.value),
   );
 };
 const isPriceSelected = (option: any) => {
   return selectedFilters.value.some(
-    (filter: { id: any }) => String(filter.id) === String(option.values)
+    (filter: { id: any }) => String(filter.id) === String(option.values),
   );
 };
 const isItemActive = (selectedValue: string) => {
@@ -79,7 +79,7 @@ const priceModel = ref<any>("");
 const selectPrice = (values: any) => {
   const newValue: any = [values];
   const getIndex = selectedFilters.value.findIndex(
-    (item: { filterName: string }) => item?.filterName === "price"
+    (item: { filterName: string }) => item?.filterName === "price",
   );
   if (getIndex > -1) {
     selectedFilters.value[getIndex].id = newValue[0];
@@ -93,10 +93,10 @@ const selectPrice = (values: any) => {
 };
 const selectedFilter = (
   facet: { label: string },
-  option: { id: string; value: string; label: string }
+  option: { id: string; value: string; label: string },
 ) => {
   const alreadySelectedIndex = selectedFilters.value.findIndex(
-    (filter: { id: string }) => String(filter.id) === String(option.value)
+    (filter: { id: string }) => String(filter.id) === String(option.value),
   );
   if (alreadySelectedIndex === -1) {
     selectedFilters.value.push({
@@ -113,7 +113,7 @@ const applyFilters = () => {
     selectedFilters.value = selectedFilters.value?.filter(
       (item: ProductFilterType) => {
         return item.filterName !== "price";
-      }
+      },
     );
   }
   const filters = selectedFilters.value.filter((item: any) => {
