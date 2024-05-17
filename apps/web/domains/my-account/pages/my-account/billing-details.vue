@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { AddressEnum } from "~/graphql";
+
 definePageMeta({
   layout: "account",
 });
