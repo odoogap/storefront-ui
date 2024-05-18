@@ -18,12 +18,7 @@ const NuxtLink = resolveComponent("NuxtLink");
 const { isOpen, open, close } = useDisclosure();
 const { cart, loadCart } = useCart();
 
-const {
-  loadBillingAddresses,
-  loadShippingAddresses,
-  mailingAddresses,
-  billingAddresses,
-} = useAddresses();
+const { loadAddresses, shippingAddresses, billingAddresses } = useAddresses();
 
 const { loadCountryList } = useCountry();
 const { updatePartner } = usePartner();
@@ -35,8 +30,8 @@ const {
 } = usePayment();
 
 await loadCart();
-await loadShippingAddresses();
-await loadBillingAddresses();
+await loadAddresses(AddressEnum.Billing);
+await loadAddresses(AddressEnum.Shipping);
 await loadDeliveryMethods();
 await loadPaymentMethods();
 await loadCountryList();
