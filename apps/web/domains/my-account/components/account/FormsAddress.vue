@@ -25,7 +25,7 @@ const {
   selectCurrentAddress,
 } = useAddresses();
 const { countries, loadCountryList } = useCountry();
-const { user, loadUser } = useUser();
+const { user } = useUser();
 
 const defaultValues = ref({
   name: "",
@@ -110,7 +110,7 @@ function isCurrentAddress(id) {
   }
   return user.value?.billingAddress?.id === id;
 }
-await loadUser();
+
 await loadCountryList();
 </script>
 <template>

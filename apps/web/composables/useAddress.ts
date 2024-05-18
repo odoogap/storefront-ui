@@ -1,3 +1,4 @@
+import { useToast } from "vue-toastification";
 import {
   AddressEnum,
   AddressesResponse,
@@ -18,7 +19,6 @@ import {
 } from "~/graphql";
 import { MutationName } from "~/server/mutations";
 import { QueryName } from "~/server/queries";
-import { useToast } from "vue-toastification";
 
 export const useAddresses = () => {
   const { $sdk } = useNuxtApp();
@@ -26,12 +26,10 @@ export const useAddresses = () => {
   const loading = ref(false);
   const toast = useToast();
   const billingAddresses = useState<Partner[]>("billing-addresses", () => []);
-  const mailingAddresses = useState<Partner[]>("mailing-addresses", () => []);
-
+  const shippingAddresses = useState<Partner[]>("shipping-addresses", () => []);
 
   const loadBillingAddresses = async () => {
     loading.value = true;
-
 
     const { data, error } = await $sdk().odoo.query<
       QueryAddressesArgs,
@@ -65,7 +63,7 @@ export const useAddresses = () => {
       return toast.error(error.value.data.message);
     }
 
-    mailingAddresses.value = data.value.addresses;
+    shippingAddresses.value = data.value.addresses;
     loading.value = false;
   };
 
@@ -128,10 +126,10 @@ export const useAddresses = () => {
       billingAddresses.value[index] = address;
     } else {
       const address = data.value.updateAddress;
-      const index = mailingAddresses.value.findIndex(
+      const index = shippingAddresses.value.findIndex(
         (addr) => addr.id === address.id
       );
-      mailingAddresses.value[index] = address;
+      shippingAddresses.value[index] = address;
     }
 
     toast.success("Address has been successfully updated");
@@ -161,7 +159,7 @@ export const useAddresses = () => {
     loadBillingAddresses,
     loadShippingAddresses,
     billingAddresses,
-    mailingAddresses,
+    shippingAddresses,
     selectCurrentAddress,
     addAddress,
     updateAddress,
