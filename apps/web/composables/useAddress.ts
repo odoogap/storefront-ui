@@ -15,7 +15,6 @@ import {
   DeleteAddressInput,
   MutationDeleteAddressArgs,
   DeleteAddressResponse,
-  AddressFilterInput,
 } from "~/graphql";
 import { MutationName } from "~/server/mutations";
 import { QueryName } from "~/server/queries";
@@ -28,7 +27,7 @@ export const useAddresses = () => {
   const billingAddresses = useState<Partner[]>("billing-addresses", () => []);
   const shippingAddresses = useState<Partner[]>("shipping-addresses", () => []);
 
-  const loadBillingAddresses = async () => {
+  const loadAddresses = async (addressType: AddressEnum) => {
     loading.value = true;
 
     const { data, error } = await $sdk().odoo.query<
@@ -36,34 +35,19 @@ export const useAddresses = () => {
       AddressesResponse
     >(
       { queryName: QueryName.GetAddressesQuery },
-      { filter: { addressType: [AddressEnum.Billing] } }
+      { filter: { addressType: addressType } }
     );
 
     if (error.value) {
       return toast.error(error.value.data.message);
     }
 
-    billingAddresses.value = data.value.addresses;
-
-    loading.value = false;
-  };
-
-  const loadShippingAddresses = async () => {
-    loading.value = true;
-
-    const { data, error } = await $sdk().odoo.query<
-      QueryAddressesArgs,
-      AddressesResponse
-    >(
-      { queryName: QueryName.GetAddressesQuery },
-      { filter: { addressType: [AddressEnum.Shipping] } }
-    );
-
-    if (error.value) {
-      return toast.error(error.value.data.message);
+    if (addressType === AddressEnum.Billing) {
+      billingAddresses.value = data.value.addresses;
+    } else {
+      shippingAddresses.value = data.value.addresses;
     }
 
-    shippingAddresses.value = data.value.addresses;
     loading.value = false;
   };
 
@@ -78,11 +62,8 @@ export const useAddresses = () => {
     if (error.value) {
       return toast.error(error.value.data.message);
     }
-    if (type === AddressEnum.Billing) {
-      loadBillingAddresses();
-    } else {
-      loadShippingAddresses();
-    }
+
+    loadAddresses(type);
 
     toast.success("Address has been successfully saved");
     loading.value = false;
@@ -151,13 +132,14 @@ export const useAddresses = () => {
       return toast.error(error.value.data.message);
     }
 
+    loadAddresses(type);
+
     toast.success(`Current ${type} address saved successfully`);
     loading.value = false;
   };
 
   return {
-    loadBillingAddresses,
-    loadShippingAddresses,
+    loadAddresses,
     billingAddresses,
     shippingAddresses,
     selectCurrentAddress,

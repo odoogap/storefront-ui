@@ -20,8 +20,7 @@ const {
   deleteAddress,
   updateAddress,
   addAddress,
-  loadBillingAddresses,
-  loadShippingAddresses,
+  loadAddresses,
   selectCurrentAddress,
 } = useAddresses();
 const { countries, loadCountryList } = useCountry();
@@ -65,11 +64,7 @@ const newAddress = () => {
 
 const removeAddress = (id) => {
   deleteAddress({ id: id });
-  if (props.type === AddressEnum.Billing) {
-    loadBillingAddresses();
-  } else {
-    loadShippingAddresses();
-  }
+  loadAddresses(props.type);
 };
 
 const submitAddress = () => {

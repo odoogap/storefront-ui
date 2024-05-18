@@ -4,9 +4,9 @@ import { AddressEnum } from "~/graphql";
 definePageMeta({
   layout: "account",
 });
-const { shippingAddresses, loadShippingAddresses } = useAddresses();
+const { shippingAddresses, loadAddresses } = useAddresses();
 
-await loadShippingAddresses();
+await loadAddresses(AddressEnum.Shipping);
 </script>
 <template>
   <UiDivider class="w-screen -mx-4 md:col-span-3 md:w-auto md:mx-0" />

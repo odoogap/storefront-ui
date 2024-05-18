@@ -34,8 +34,8 @@ export const useUser = () => {
       queryName: QueryName.LoadUserQuery,
     });
 
-    userCookie.value = data.value.partner;
-    user.value = data.value.partner;
+    userCookie.value = data.value?.partner;
+    user.value = data.value?.partner;
 
     loading.value = false;
   };
