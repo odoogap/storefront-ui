@@ -114,7 +114,7 @@ await loadUser();
         @on-save="saveNewName"
         @on-cancel="closeModal"
       />
-      <FormContactInformation
+      <AccountFormsContactInformation
         v-else-if="openedForm === 'contactInformation'"
         :email="user?.email"
         @on-save="saveNewEmail"
