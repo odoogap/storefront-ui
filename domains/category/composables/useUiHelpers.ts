@@ -8,6 +8,7 @@ export const useUiHelpers = () => {
 
   const queryParamsNotFilters = ["page", "sort", "itemsPerPage"];
   const localePrefixes = ["/en", "/de", "/ru"];
+
   const pathToSlug = (): string => {
     for (const localePrefix of localePrefixes) {
       if (path.startsWith(localePrefix)) {
