@@ -9,7 +9,7 @@ export async function generateCustomRoutesForCategories() {
       {
         query: `
         query GetCategoriesForCustomRoutes {
-          categories {
+          categories(pageSize:1000) {
             categories {
               slug
             }
@@ -48,12 +48,12 @@ export async function generateCustomRoutesForProducts() {
       {
         query: `
         query GetProductsForCustomRoutes {
-          products{
+          products(pageSize:1000){
             products{
               slug
             }
           }
-        }
+        }        
       `,
       }
     );

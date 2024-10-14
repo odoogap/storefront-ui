@@ -25,19 +25,20 @@ export default defineNuxtConfig({
 
     // Generating static routes using prerender true config
     async "prerender:routes"(routes) {
-      const { customCategoryRoutes } = await import(
-        "./customCategoryRoutes.js"
+      const { customCategoriesRoutes } = await import(
+        "./customCategoriesRoutes.js"
+      );
+      const { customProductsRoutes } = await import(
+        "./customProductsRoutes.js"
       );
 
-      customCategoryRoutes.forEach((categoryRoute: string) =>
-        routes.routes.add(categoryRoute)
-      );
+      customCategoriesRoutes.forEach((categoryRoute: string) => {
+        routes.routes.add(categoryRoute);
+      });
 
-      const { customProductRoutes } = await import("./customProductRoutes.js");
-
-      customProductRoutes.forEach((productRoute: string) =>
-        routes.routes.add(productRoute)
-      );
+      customProductsRoutes.forEach((productRoute: string) => {
+        routes.routes.add(productRoute);
+      });
     },
   },
 
@@ -151,11 +152,12 @@ export default defineNuxtConfig({
 
   routeRules: {
     "/": { prerender: true },
-    "/product/*": { swr: Number(process.env?.NUXT_SWR_CACHE_TIME) },
   },
 
   nitro: {
-    // compressPublicAssets: true,
+    prerender: {
+      concurrency: 1, // it fixes error 500 limiting to render one route by server request
+    },
     storage: {
       cache: {
         driver: process.env.NUXT_STORAGE_DRIVER,
