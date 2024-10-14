@@ -1,4 +1,5 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import { generateCustomRoutes } from "./generateCustomRoutes";
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
@@ -10,6 +11,19 @@ export default defineNuxtConfig({
         lang: "en",
       },
       meta: [{ name: "robots", content: "index, follow" }],
+    },
+  },
+
+  hooks: {
+    async "build:before"() {
+      await generateCustomRoutes();
+    },
+
+    // Generating static routes using prerender true config
+    async "prerender:routes"(routes) {
+      const { customRoutes } = await import("./customRoutes.js");
+
+      customRoutes.forEach((route: string) => routes.routes.add(route));
     },
   },
 
@@ -123,8 +137,6 @@ export default defineNuxtConfig({
 
   routeRules: {
     "/": { prerender: true },
-    "/category/15": { prerender: true },
-    "/category/16": { swr: Number(process.env?.NUXT_SWR_CACHE_TIME) },
     "/product/*": { swr: Number(process.env?.NUXT_SWR_CACHE_TIME) },
   },
 
