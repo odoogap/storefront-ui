@@ -1,4 +1,7 @@
-import { generateCustomRoutes } from "./generateCustomRoutes";
+import {
+  generateCustomRoutesForCategories,
+  generateCustomRoutesForProducts,
+} from "./generateCustomRoutes";
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -16,14 +19,25 @@ export default defineNuxtConfig({
 
   hooks: {
     async "build:before"() {
-      await generateCustomRoutes();
+      await generateCustomRoutesForCategories();
+      await generateCustomRoutesForProducts();
     },
 
     // Generating static routes using prerender true config
     async "prerender:routes"(routes) {
-      const { customRoutes } = await import("./customRoutes.js");
+      const { customCategoryRoutes } = await import(
+        "./customCategoryRoutes.js"
+      );
 
-      customRoutes.forEach((route: string) => routes.routes.add(route));
+      customCategoryRoutes.forEach((categoryRoute: string) =>
+        routes.routes.add(categoryRoute)
+      );
+
+      const { customProductRoutes } = await import("./customProductRoutes.js");
+
+      customProductRoutes.forEach((productRoute: string) =>
+        routes.routes.add(productRoute)
+      );
     },
   },
 
