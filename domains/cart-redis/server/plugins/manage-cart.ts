@@ -1,6 +1,7 @@
 import { AddressType, type Cart } from "~/graphql";
 import { MutationName } from "~/server/mutations";
 import { QueryName } from "~/server/queries";
+import simplifyCart from "../../utils/cartSerializer";
 
 /**
  * This plugin is responsible for managing the cart cache.
@@ -39,7 +40,8 @@ async function cartAddItem(event: any, body: any) {
     )) || { cart: {} };
 
     const cart = Object.assign({}, currentCart.cart, body.cartAddMultipleItems);
-    useStorage().setItem(keyName, { cart });
+    const reducedCart = simplifyCart(cart)
+    useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -57,7 +59,8 @@ async function applyCoupon(event: any, body: any) {
     )) || { cart: {} };
 
     const cart = Object.assign({}, currentCart.cart, body.applyCoupon);
-    useStorage().setItem(keyName, { cart });
+    const reducedCart = simplifyCart(cart)
+    useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -75,7 +78,8 @@ async function applyGiftCard(event: any, body: any) {
     )) || { cart: {} };
 
     const cart = Object.assign({}, currentCart.cart, body.applyGiftCard);
-    useStorage().setItem(keyName, { cart });
+    const reducedCart = simplifyCart(cart)
+    useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -96,7 +100,8 @@ async function cartRemoveItem(event: any, body: any) {
       currentCart.cart,
       body.cartRemoveMultipleItems
     );
-    await useStorage().setItem(keyName, { cart });
+    const reducedCart = simplifyCart(cart)
+    await useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -117,7 +122,8 @@ async function cartUpdateItem(event: any, body: any) {
       currentCart.cart,
       body.cartUpdateMultipleItems
     );
-    await useStorage().setItem(keyName, { cart });
+    const reducedCart = simplifyCart(cart)
+    await useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -136,7 +142,8 @@ async function addAddress(event: any, body: any) {
     } else {
       currentCart.cart.order.partnerInvoice = body.addAddress;
     }
-    await useStorage().setItem(keyName, currentCart);
+    const reducedCart = simplifyCart(currentCart.cart)
+    await useStorage().setItem(keyName, {cart: reducedCart});
   }
 }
 
@@ -156,8 +163,8 @@ async function updateAddress(event: any, body: any) {
     } else {
       currentCart.cart.order.partnerInvoice = body.updateAddress;
     }
-
-    await useStorage().setItem(keyName, currentCart);
+    const reducedCart = simplifyCart(currentCart.cart)
+    await useStorage().setItem(keyName, {cart: reducedCart});
   }
 }
 
@@ -172,7 +179,8 @@ async function createUpdatePartner(event: any, body: any) {
     const currentCart =
       (await useStorage().getItem<{ cart: Cart }>(keyName)) || ({} as any);
     currentCart.cart.order.partner = body.createUpdatePartner;
-    await useStorage().setItem(keyName, currentCart);
+    const reducedCart = simplifyCart(currentCart.cart)
+    await useStorage().setItem(keyName, {cart: reducedCart});
   }
 }
 
