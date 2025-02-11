@@ -1,7 +1,7 @@
 import { AddressType, type Cart } from "~/graphql";
 import { MutationName } from "~/server/mutations";
 import { QueryName } from "~/server/queries";
-import simplifyCart from "../../utils/cartSerializer";
+import { reduceCart, updateCart } from "../../utils/cartHelpers";
 
 /**
  * This plugin is responsible for managing the cart cache.
@@ -30,18 +30,7 @@ async function cartAddItem(event: any, body: any) {
   const requestBody = await readBody(event);
 
   if (requestBody[0]?.mutationName === MutationName.CartAddItem) {
-    const session = await useSession(event, {
-      password: "b013b03ac2231e0b448e9a22ba488dcf",
-    });
-
-    const keyName = `cache:cart:${session?.id}`;
-    const currentCart = (await useStorage().getItem<{ cart: Cart }>(
-      keyName
-    )) || { cart: {} };
-
-    const cart = Object.assign({}, currentCart.cart, body.cartAddMultipleItems);
-    const reducedCart = simplifyCart(cart)
-    useStorage().setItem(keyName, { cart: reducedCart });
+    await updateCart(event, body.cartAddMultipleItems)
   }
 }
 
@@ -49,18 +38,7 @@ async function applyCoupon(event: any, body: any) {
   const requestBody = await readBody(event);
 
   if (requestBody[0]?.mutationName === MutationName.ApplyCouponMutation) {
-    const session = await useSession(event, {
-      password: "b013b03ac2231e0b448e9a22ba488dcf",
-    });
-
-    const keyName = `cache:cart:${session?.id}`;
-    const currentCart = (await useStorage().getItem<{ cart: Cart }>(
-      keyName
-    )) || { cart: {} };
-
-    const cart = Object.assign({}, currentCart.cart, body.applyCoupon);
-    const reducedCart = simplifyCart(cart)
-    useStorage().setItem(keyName, { cart: reducedCart });
+    await updateCart(event, body.applyCoupon)
   }
 }
 
@@ -68,62 +46,21 @@ async function applyGiftCard(event: any, body: any) {
   const requestBody = await readBody(event);
 
   if (requestBody[0]?.mutationName === MutationName.ApplyGiftCardMutation) {
-    const session = await useSession(event, {
-      password: "b013b03ac2231e0b448e9a22ba488dcf",
-    });
-
-    const keyName = `cache:cart:${session?.id}`;
-    const currentCart = (await useStorage().getItem<{ cart: Cart }>(
-      keyName
-    )) || { cart: {} };
-
-    const cart = Object.assign({}, currentCart.cart, body.applyGiftCard);
-    const reducedCart = simplifyCart(cart)
-    useStorage().setItem(keyName, { cart: reducedCart });
+    await updateCart(event, body.applyGiftCard)
   }
 }
 
 async function cartRemoveItem(event: any, body: any) {
   const requestBody = await readBody(event);
   if (requestBody[0]?.mutationName === MutationName.CartRemoveItem) {
-    const session = await useSession(event, {
-      password: "b013b03ac2231e0b448e9a22ba488dcf",
-    });
-
-    const keyName = `cache:cart:${session?.id}`;
-    const currentCart = (await useStorage().getItem<{ cart: Cart }>(
-      keyName
-    )) || { cart: {} };
-
-    const cart = Object.assign(
-      {},
-      currentCart.cart,
-      body.cartRemoveMultipleItems
-    );
-    const reducedCart = simplifyCart(cart)
-    await useStorage().setItem(keyName, { cart: reducedCart });
+    await updateCart(event, body.cartRemoveMultipleItems)
   }
 }
 
 async function cartUpdateItem(event: any, body: any) {
   const requestBody = await readBody(event);
   if (requestBody[0]?.mutationName === MutationName.CartUpdateQuantity) {
-    const session = await useSession(event, {
-      password: "b013b03ac2231e0b448e9a22ba488dcf",
-    });
-
-    const keyName = `cache:cart:${session?.id}`;
-    const currentCart = (await useStorage().getItem<{ cart: Cart }>(
-      keyName
-    )) || { cart: {} };
-
-    const cart = Object.assign(
-      {},
-      currentCart.cart,
-      body.cartUpdateMultipleItems
-    );
-    const reducedCart = simplifyCart(cart)
-    await useStorage().setItem(keyName, { cart: reducedCart });
+    await updateCart(event, body.cartUpdateMultipleItems)
   }
 }
 
@@ -142,8 +79,8 @@ async function addAddress(event: any, body: any) {
     } else {
       currentCart.cart.order.partnerInvoice = body.addAddress;
     }
-    const reducedCart = simplifyCart(currentCart.cart)
-    await useStorage().setItem(keyName, {cart: reducedCart});
+    const reducedCart = reduceCart(currentCart.cart)
+    await useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -163,8 +100,9 @@ async function updateAddress(event: any, body: any) {
     } else {
       currentCart.cart.order.partnerInvoice = body.updateAddress;
     }
-    const reducedCart = simplifyCart(currentCart.cart)
-    await useStorage().setItem(keyName, {cart: reducedCart});
+
+    const reducedCart = reduceCart(currentCart.cart)
+    await useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
@@ -179,8 +117,9 @@ async function createUpdatePartner(event: any, body: any) {
     const currentCart =
       (await useStorage().getItem<{ cart: Cart }>(keyName)) || ({} as any);
     currentCart.cart.order.partner = body.createUpdatePartner;
-    const reducedCart = simplifyCart(currentCart.cart)
-    await useStorage().setItem(keyName, {cart: reducedCart});
+
+    const reducedCart = reduceCart(currentCart.cart)
+    await useStorage().setItem(keyName, { cart: reducedCart });
   }
 }
 
